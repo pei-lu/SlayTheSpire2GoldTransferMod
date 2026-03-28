@@ -1,0 +1,12 @@
+{
+  "id": "sts2-shop-mod",
+  "name": "money laundering",
+  "author": "lupei",
+  "description": "allow you to give money to your friend in shop",
+  "version": "1.0",
+  "has_pck": false,
+  "has_dll": true,
+  "dependencies": ["BaseLib"],
+  "affects_gameplay": true,
+  "fee": 10
+}

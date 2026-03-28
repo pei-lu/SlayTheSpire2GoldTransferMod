@@ -1,0 +1,51 @@
+<Project Sdk="Godot.NET.Sdk/4.5.1">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>true</ImplicitUsings>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Must match the "id" field in MoneyExchangeMod.json so the game finds the DLL -->
+    <AssemblyName>sts2-shop-mod</AssemblyName>
+    <!-- STS002: no localization files in this mod -->
+    <NoWarn>$(NoWarn);STS002</NoWarn>
+
+    <!-- 改成你的杀戮尖塔2目录 -->
+    <Sts2Dir>D:\SteamLibrary\steamapps\common\Slay the Spire 2</Sts2Dir>
+    <Sts2DataDir>$(Sts2Dir)\data_sts2_windows_x86_64</Sts2DataDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- BaseLib ships as its own mod; reference the pre-built DLL directly -->
+    <Reference Include="BaseLib">
+      <HintPath>$(Sts2Dir)\mods\BaseLib.0.2.0\BaseLib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <PackageReference Include="Alchyr.Sts2.ModAnalyzers" Version="*" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="sts2">
+      <HintPath>$(Sts2DataDir)\sts2.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="0Harmony">
+      <HintPath>$(Sts2DataDir)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ModAssets Include="assets\**\*.*" />
+  </ItemGroup>
+
+  <!-- 自动复制dll和json和assets -->
+  <Target Name="Copy Mod" AfterTargets="PostBuildEvent">
+    <Message Text="Copying mod to Slay the Spire 2 mods folder..." Importance="high" />
+    <MakeDir Directories="$(Sts2Dir)\mods\$(MSBuildProjectName)\assets\" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(Sts2Dir)\mods\$(MSBuildProjectName)\" />
+    <Copy SourceFiles="MoneyExchangeMod.json" DestinationFolder="$(Sts2Dir)\mods\$(MSBuildProjectName)\" />
+    <Copy SourceFiles="@(ModAssets)" DestinationFolder="$(Sts2Dir)\mods\$(MSBuildProjectName)\assets\" />
+  </Target>
+</Project>
