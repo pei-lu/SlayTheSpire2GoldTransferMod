@@ -1,0 +1,11 @@
+{
+  "SEND_GOLD.tooltip": "Send Gold to Ally",
+  "SEND_GOLD.window_title": "Send Gold to Ally",
+  "SEND_GOLD.your_gold": "Your gold: {gold}",
+  "SEND_GOLD.amount_label": "Amount to send:",
+  "SEND_GOLD.preview_with_fee": "Recipient gets: {received} gold  (fee: {fee}%)",
+  "SEND_GOLD.preview_no_fee": "Recipient gets: {received} gold",
+  "SEND_GOLD.send_to": "Send to:",
+  "SEND_GOLD.recipient_button": "{name}  ({gold} gold)",
+  "SEND_GOLD.cancel": "Cancel"
+}

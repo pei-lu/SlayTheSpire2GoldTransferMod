@@ -1,0 +1,11 @@
+{
+  "SEND_GOLD.tooltip": "赠送金币给队友",
+  "SEND_GOLD.window_title": "赠送金币给队友",
+  "SEND_GOLD.your_gold": "你的金币：{gold}",
+  "SEND_GOLD.amount_label": "赠送数量：",
+  "SEND_GOLD.preview_with_fee": "对方获得：{received} 金币（手续费：{fee}%）",
+  "SEND_GOLD.preview_no_fee": "对方获得：{received} 金币",
+  "SEND_GOLD.send_to": "赠送给：",
+  "SEND_GOLD.recipient_button": "{name}（{gold} 金币）",
+  "SEND_GOLD.cancel": "取消"
+}

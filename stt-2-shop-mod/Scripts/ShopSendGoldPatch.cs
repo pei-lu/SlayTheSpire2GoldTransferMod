@@ -16,6 +16,7 @@ using MegaCrit.Sts2.Core.Multiplayer.Messages.Game.Sync;
 using MegaCrit.Sts2.Core.Nodes.Screens.Shops;
 using MegaCrit.Sts2.Core.Platform;
 using MegaCrit.Sts2.Core.Rewards;
+using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Runs;
 
 namespace Test.Scripts;
@@ -29,9 +30,30 @@ namespace Test.Scripts;
 public static class ShopSendGoldPatch
 {
     private const string ButtonNodeName = "SendGoldButton";
+    private const string LocTable = Entry.ModId;
 
     // Fee is read directly from ShopModConfig, which BaseLib keeps in sync.
     private static int Fee => ShopModConfig.Fee;
+
+    /// Returns the localized string, or <paramref name="fallback"/> if the table is not loaded yet.
+    private static string Loc(string key, string fallback)
+    {
+        try { return LocString.Exists(LocTable, key) ? new LocString(LocTable, key).GetRawText() : fallback; }
+        catch { return fallback; }
+    }
+
+    /// Returns the localized + formatted string, or <paramref name="fallback"/> if the table is not loaded yet.
+    private static string LocFmt(string key, string fallback, Action<LocString> addVars)
+    {
+        try
+        {
+            if (!LocString.Exists(LocTable, key)) return fallback;
+            var ls = new LocString(LocTable, key);
+            addVars(ls);
+            return ls.GetFormattedText();
+        }
+        catch { return fallback; }
+    }
 
     // -------------------------------------------------------------------------
     // Harmony patch
@@ -42,6 +64,10 @@ public static class ShopSendGoldPatch
     static void Postfix(NMerchantInventory __instance)
     {
         GD.Print("[sts2-shop-mod] NMerchantInventory._Ready() patched — setting up Send Gold button");
+
+        // Button is only useful in multiplayer; skip entirely in solo.
+        if (RunManager.Instance.IsSinglePlayerOrFakeMultiplayer)
+            return;
 
         if (__instance.GetNodeOrNull(ButtonNodeName) != null)
             return;
@@ -90,7 +116,7 @@ public static class ShopSendGoldPatch
                 button.CustomMinimumSize = new Vector2(h, h);
 
                 // LOCAL position relative to shared parent — moves with the animation.
-                button.Position = cardRemoval.Position + new Vector2(cardRemoval.Size.X + 8f, 0f);
+                button.Position = cardRemoval.Position + new Vector2(cardRemoval.Size.X + 8f - 100f, -100f);
                 GD.Print($"[sts2-shop-mod] Button placed at local {button.Position} (cardRemoval local {cardRemoval.Position}, size {cardRemoval.Size})");
             }
             __instance.GetTree().ProcessFrame -= oneShot;
@@ -106,12 +132,15 @@ public static class ShopSendGoldPatch
 
     private static void OnButtonPressed(NMerchantInventory shopNode, TextureButton button)
     {
+        GD.Print("[sts2-shop-mod] Send Gold button pressed");
         var player = shopNode.Inventory?.Player;
-        if (player == null) return;
+        if (player == null) { GD.Print("[sts2-shop-mod] player is null, aborting"); return; }
 
         var others = player.RunState.Players
             .Where(p => p != player)
             .ToArray();
+
+        GD.Print($"[sts2-shop-mod] player={player.NetId} gold={player.Gold} allies={others.Length}");
 
         if (others.Length == 0)
         {
@@ -119,7 +148,7 @@ public static class ShopSendGoldPatch
             return;
         }
 
-        if (player.Gold <= 0) return;
+        if (player.Gold <= 0) { GD.Print("[sts2-shop-mod] no gold, aborting"); return; }
 
         OpenTransferDialog(shopNode, player, others);
     }
@@ -134,7 +163,7 @@ public static class ShopSendGoldPatch
 
         var popup = new Window
         {
-            Title = "Send Gold to Ally",
+            Title = Loc("SEND_GOLD.window_title", "Send Gold to Ally"),
             InitialPosition = Window.WindowInitialPosition.CenterMainWindowScreen,
             Size = new Vector2I(300, windowHeight),
             Unresizable = true,
@@ -154,8 +183,8 @@ public static class ShopSendGoldPatch
         vbox.AddThemeConstantOverride("separation", 8);
         margin.AddChild(vbox);
 
-        vbox.AddChild(new Label { Text = $"Your gold: {sender.Gold}" });
-        vbox.AddChild(new Label { Text = "Amount to send:" });
+        vbox.AddChild(new Label { Text = LocFmt("SEND_GOLD.your_gold", $"Your gold: {sender.Gold}", ls => ls.Add("gold", (decimal)sender.Gold)) });
+        vbox.AddChild(new Label { Text = Loc("SEND_GOLD.amount_label", "Amount to send:") });
 
         var spinner = new SpinBox
         {
@@ -173,7 +202,7 @@ public static class ShopSendGoldPatch
         vbox.AddChild(previewLabel);
 
         vbox.AddChild(new HSeparator());
-        vbox.AddChild(new Label { Text = "Send to:" });
+        vbox.AddChild(new Label { Text = Loc("SEND_GOLD.send_to", "Send to:") });
 
         var gs = GetGameService();
         foreach (var target in recipients)
@@ -181,7 +210,7 @@ public static class ShopSendGoldPatch
             string name = gs != null
                 ? PlatformUtil.GetPlayerName(gs.Platform, target.NetId)
                 : $"Player {sender.RunState.GetPlayerSlotIndex(target) + 1}";
-            var sendBtn = new Button { Text = $"{name}  ({target.Gold} gold)" };
+            var sendBtn = new Button { Text = LocFmt("SEND_GOLD.recipient_button", $"{name}  ({target.Gold} gold)", ls => { ls.Add("name", name); ls.Add("gold", (decimal)target.Gold); }) };
             var capturedTarget = target;
             sendBtn.Pressed += () =>
             {
@@ -194,7 +223,7 @@ public static class ShopSendGoldPatch
         }
 
         vbox.AddChild(new HSeparator());
-        var cancelBtn = new Button { Text = "Cancel" };
+        var cancelBtn = new Button { Text = Loc("SEND_GOLD.cancel", "Cancel") };
         cancelBtn.Pressed += popup.QueueFree;
         vbox.AddChild(cancelBtn);
 
@@ -206,8 +235,8 @@ public static class ShopSendGoldPatch
     {
         int received = CalcReceived(amount);
         label.Text = Fee > 0
-            ? $"Recipient gets: {received} gold  (fee: {Fee}%)"
-            : $"Recipient gets: {received} gold";
+            ? LocFmt("SEND_GOLD.preview_with_fee", $"Recipient gets: {received} gold  (fee: {Fee}%)", ls => { ls.Add("received", (decimal)received); ls.Add("fee", (decimal)Fee); })
+            : LocFmt("SEND_GOLD.preview_no_fee", $"Recipient gets: {received} gold", ls => ls.Add("received", (decimal)received));
     }
 
     // -------------------------------------------------------------------------

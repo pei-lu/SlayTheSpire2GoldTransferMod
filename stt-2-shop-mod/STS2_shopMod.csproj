@@ -7,7 +7,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Must match the "id" field in MoneyExchangeMod.json so the game finds the DLL -->
     <AssemblyName>sts2-shop-mod</AssemblyName>
-    <!-- STS002: no localization files in this mod -->
+    <!-- STS002: localization is in the PCK, not loose files -->
     <NoWarn>$(NoWarn);STS002</NoWarn>
 
     <!-- 改成你的杀戮尖塔2目录 -->
@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- BaseLib ships as its own mod; reference the pre-built DLL directly -->
+    <!-- Always reference BaseLib from the game mods directory -->
     <Reference Include="BaseLib">
       <HintPath>$(Sts2Dir)\mods\BaseLib.0.2.0\BaseLib.dll</HintPath>
       <Private>false</Private>
@@ -38,6 +38,10 @@
 
   <ItemGroup>
     <ModAssets Include="assets\**\*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="sts2-shop-mod\localization\**\*.json" />
   </ItemGroup>
 
   <!-- 自动复制dll和json和assets -->

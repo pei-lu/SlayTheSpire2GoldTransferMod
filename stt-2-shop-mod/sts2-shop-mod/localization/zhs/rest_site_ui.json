@@ -1,0 +1,5 @@
+{
+  "OPTION_SOCIAL.name": "社交",
+  "OPTION_SOCIAL.description": "从你的牌组中赠送一张牌给队友。",
+  "OPTION_SOCIAL.descriptionDisabled": "你的牌组是空的。"
+}

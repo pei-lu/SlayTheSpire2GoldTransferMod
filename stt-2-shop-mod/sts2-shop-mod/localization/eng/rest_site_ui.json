@@ -1,0 +1,5 @@
+{
+  "OPTION_SOCIAL.name": "Social",
+  "OPTION_SOCIAL.description": "Give a card from your deck to an ally.",
+  "OPTION_SOCIAL.descriptionDisabled": "Your deck is empty."
+}
