@@ -4,5 +4,7 @@
 在商店节点，你将能够给你的小伙伴打钱  
 但是奸商会收取你10% 的手续费  
 在商店节点你会看到本人的OC，对话就能够给队友塞钱（美术风格不统一致歉） 
-前置mod[baseLib](https://github.com/Alchyr/BaseLib-StS2)
+前置mod[baseLib](https://github.com/Alchyr/BaseLib-StS2) 0.20 版为稳定版本 0.21为beta版本
 详细mod教程参见[杀戮尖塔2中文mod教程](https://github.com/GlitchedReme/SlayTheSpire2ModdingTutorials)
+
+
